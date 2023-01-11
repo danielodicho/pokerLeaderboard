@@ -1,0 +1,146 @@
+<!-- leaderboard/templates/leaderboard.html -->
+
+{% load static %}
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.1/css/bulma.min.css">
+  <link rel="stylesheet" href="{% static '/style.css/' %}">
+</head>
+<section class="section">
+  <div class="container">
+    <div class="alert-container" id="alert"></div>
+    <h1 class="title">Poker Leaderboard</h1>
+    <table class="table is-striped is-hoverable is-fullwidth">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Current Amount</th>
+        <th>Peak Amount</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for player in players %}
+      <tr>
+        <td>{{ player.name }}</td>
+        <td>{{ player.current_amount }}</td>
+        <td>{{ player.peak_amount }}</td>
+        <td>
+          <div class="buttons">
+            <button class="button is-danger is-small is-outlined remove-button" data-id="{{ player.id }}">Remove</button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <br>
+    <form class="form" id="add-form">
+      <div class="field">
+        <label class="label" for="name-input">Name</label>
+        <div class="control">
+          <input class="input" type="text" id="name-input" placeholder="Name">
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <button class="button is-link" type="submit">Add Player</button>
+        </div>
+      </div>
+    </form>
+    <br>
+   <form class="form" action="{% url 'start_game' %}" method="post">
+  {% csrf_token %}
+  <div class="field">
+    <label class="label">Select Players:</label>
+    <div class="control">
+      <div class="select is-multiple">
+        <select multiple name="players">
+          {% for player in players %}
+          <option class="player-option" value="{{ player.id }}">{{ player.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label class="label" for="buy-in">Buy-In Amount:</label>
+    <div class="control">
+      <input class="input" id="buy-in" name="buy-in" type="number">
+    </div>
+  </div>
+  <div class="field">
+    <div class="control">
+      <button class="button is-success" type="submit">Start Game</button>
+    </div>
+  </div>
+</form>
+    </div>
+  </section>
+</body>
+</html>
+
+
+<script>
+  const removeButtons = document.querySelectorAll('.remove-button');
+  removeButtons.forEach(button => {
+    button.addEventListener('click', event => {
+      const playerId = event.target.getAttribute('data-id');
+      fetch(`/leaderboard/api/players/${playerId}/`, {
+        method: 'DELETE',
+       headers: {
+        'Content-Type': 'application/json',
+      },
+      }).then(() => {
+      showAlert("Player removed successfully!");
+
+      });
+    });
+  });
+
+  function showAlert(message) {
+    // Get the alert container element
+
+    const alertContainer = document.getElementById("alert");
+
+    // Create a new element for the alert message
+    const alertMessage = document.createElement("div");
+    alertMessage.classList.add("notification", "is-success");
+    alertMessage.innerHTML = message;
+
+    // Add the alert message to the container
+    alertContainer.appendChild(alertMessage);
+
+    // disappear the message
+
+    setTimeout(() => {
+    alertMessage.remove();
+    window.location.reload();
+    }, 1000);
+
+  }
+  const addForm = document.getElementById('add-form');
+  addForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const nameInput = document.getElementById('name-input');
+    const name = nameInput.value;
+    fetch('/leaderboard/api/players/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: name,
+        current_amount: 0,
+        peak_amount: 0,
+      }),
+    }).then(() => {
+      window.location.reload();
+    });
+  });
+</script>
+
+
+
+

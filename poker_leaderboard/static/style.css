@@ -1,0 +1,40 @@
+.is-danger {
+  background-color: #ff3860;
+  color: #fff;
+}
+.is-success {
+background-color: #23d160;
+color: #fff;
+}
+
+.is-link {
+background-color: #3273dc;
+color: #fff;
+}
+
+.is-small {
+font-size: 0.75rem;
+padding: 0.25rem 0.5rem;
+}
+
+.is-outlined {
+background-color: transparent;
+color: #3273dc;
+border-color: #3273dc;
+}
+
+#alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    z-index: 1;
+}
+
+
+.player-option {
+  /* Add a hover effect */
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
