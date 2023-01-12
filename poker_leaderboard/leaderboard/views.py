@@ -20,6 +20,19 @@ class GameViewSet(viewsets.ModelViewSet):
     queryset = Game.objects.all()
     serializer_class = GameSerializer
 
+    @action(detail=False, methods=['post'], url_name='start_game', url_path="start_game/")
+    def start_game(self, request):
+        player_ids = request.data.getlist('players')
+        players = Player.objects.filter(pk__in=player_ids)
+        buy_in_amount = request.data.get('buy-in')
+        game = Game(date_time=datetime.now(), buy_in=buy_in_amount, is_finished=False)
+        game.save()
+        for player in players:
+            buy_in = BuyIn(player=player, game=game, amount=buy_in_amount)
+            buy_in.save()
+        game.players.set(players)
+        return render(request, 'end_game.html', {'game': game})
+
     @action(detail=True, methods=['post'])
     def end_game(self, request, pk=None):
         game = self.get_object()
