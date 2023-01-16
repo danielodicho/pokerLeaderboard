@@ -1,7 +1,8 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <h1>End Game</h1>
-<form method="POST">
+<form class="form" action="{% url 'game-end_game' pk=game.id %}" method="post">
 {% csrf_token %}
   <table class="table">
     <thead>
@@ -15,7 +16,7 @@
     {% for player in players %}
     <tr>
       <td>{{ player.name }}</td>
-      <td>{{ player.buy_in }}</td>
+      <td>{{ game.buy_in }}</td>
       <td>
         <div class="control">
           <input type="number" name="{{ player.id }}" value="{{ player.current_amount }}" required>

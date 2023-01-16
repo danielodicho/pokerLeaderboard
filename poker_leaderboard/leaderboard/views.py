@@ -31,9 +31,9 @@ class GameViewSet(viewsets.ModelViewSet):
             buy_in = BuyIn(player=player, game=game, amount=buy_in_amount)
             buy_in.save()
         game.players.set(players)
-        return render(request, 'end_game.html', {'game': game})
+        return render(request, 'end_game.html', {'game': game, 'players': players})
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], url_name='end_game', url_path="end_game/")
     def end_game(self, request, pk=None):
         game = self.get_object()
         buy_ins = game.buyin_set.all()
@@ -50,6 +50,7 @@ class GameViewSet(viewsets.ModelViewSet):
                             status=400)
         game.is_finished = True
         game.save()
+        print("GEEEEEEEEEEEEE")
         return Response({'status': 'Game ended successfully'})
 
 

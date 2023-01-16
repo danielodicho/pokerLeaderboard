@@ -12,7 +12,7 @@ class Player(models.Model):
 class Game(models.Model):
     date_time = models.DateTimeField(null=True)
     players = models.ManyToManyField(Player)
-    buy_in = models.PositiveIntegerField()
+    buy_in = models.PositiveIntegerField(null=True)
     is_finished = models.BooleanField()
 class BuyIn(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
