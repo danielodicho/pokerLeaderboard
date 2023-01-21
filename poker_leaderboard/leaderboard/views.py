@@ -12,10 +12,32 @@ from datetime import datetime
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+def update_peak_amount(player):
+    if player.peak_amount < player.current_amount:
+        player.peak_amount = player.current_amount
+        player.save()
+
+def update_player_amounts(request, players):
+    for player in players:
+        print(players)
+        player.current_amount += int(request.data.get(str(player.id)))
+        update_peak_amount(player)
+        player.save()
+def validate_end_game_sum(request, game):
+    total_amount = 0
+    buy_ins = game.buyin_set.all()
+    players = game.players.all()
+    total_buy_in = game.buy_in * players.count()
+    for buy_in in buy_ins:
+        current_amount = int(request.data.get(str(buy_in.player.id)))
+        buy_in.amount = current_amount
+        buy_in.save()
+        total_amount += current_amount
+    return [total_amount == total_buy_in, total_amount, total_buy_in]
 class PlayerViewSet(viewsets.ModelViewSet):
     queryset = Player.objects.all()
     serializer_class = PlayerSerializer
-    # permission_classes = []
+    permission_classes = []
 class GameViewSet(viewsets.ModelViewSet):
     queryset = Game.objects.all()
     serializer_class = GameSerializer
@@ -36,23 +58,15 @@ class GameViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_name='end_game', url_path="end_game/")
     def end_game(self, request, pk=None):
         game = self.get_object()
-        buy_ins = game.buyin_set.all()
         players = game.players.all()
-        total_buy_in = game.buy_in * players.count()
-        total_amount = 0
-        for buy_in in buy_ins:
-            current_amount = int(request.data.get(str(buy_in.player.id)))
-            buy_in.amount = current_amount
-            buy_in.save()
-            total_amount += current_amount
-        if total_amount != total_buy_in:
-            return Response({'error': 'The sum of current amounts should be equal to the total buy-in amount'},
+        valid_end_sum, total_amount, total_buy_in = validate_end_game_sum(request, game)
+        if not valid_end_sum:
+            return Response({'error': f'The sum of current amounts should be equal to the total buy-in amount, incorrect by {total_amount - total_buy_in}'},
                             status=400)
+        update_player_amounts(request, players)
         game.is_finished = True
         game.save()
-        print("GEEEEEEEEEEEEE")
-        return Response({'status': 'Game ended successfully'})
-
+        return redirect(leaderboard_view)
 
 
 class BuyInViewSet(viewsets.ModelViewSet):
