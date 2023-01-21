@@ -17,10 +17,11 @@ def update_peak_amount(player):
         player.peak_amount = player.current_amount
         player.save()
 
-def update_player_amounts(request, players):
+def update_player_amounts(request, players, game):
     for player in players:
         print(players)
         player.current_amount += int(request.data.get(str(player.id)))
+        player.current_amount -= game.buy_in
         update_peak_amount(player)
         player.save()
 def validate_end_game_sum(request, game):
@@ -34,6 +35,7 @@ def validate_end_game_sum(request, game):
         buy_in.save()
         total_amount += current_amount
     return [total_amount == total_buy_in, total_amount, total_buy_in]
+
 class PlayerViewSet(viewsets.ModelViewSet):
     queryset = Player.objects.all()
     serializer_class = PlayerSerializer
@@ -63,7 +65,7 @@ class GameViewSet(viewsets.ModelViewSet):
         if not valid_end_sum:
             return Response({'error': f'The sum of current amounts should be equal to the total buy-in amount, incorrect by {total_amount - total_buy_in}'},
                             status=400)
-        update_player_amounts(request, players)
+        update_player_amounts(request, players, game)
         game.is_finished = True
         game.save()
         return redirect(leaderboard_view)
