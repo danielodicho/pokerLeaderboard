@@ -76,7 +76,7 @@ class BuyInViewSet(viewsets.ModelViewSet):
     serializer_class = BuyInSerializer
     # permission_classes = []
 def leaderboard_view(request):
-    players = Player.objects.all()
+    players = Player.objects.all().order_by('-current_amount')
     return render(request, 'leaderboard.html', {'players': players})
 
 
