@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 class Player(models.Model):
     name = models.CharField(max_length=100)
-    current_amount = models.IntegerField(default=0)
+    current_amount = models.DecimalField(max_digits=15, decimal_places=2,default=0)
     peak_amount = models.PositiveIntegerField(default=0)
 
     def __str__(self):
